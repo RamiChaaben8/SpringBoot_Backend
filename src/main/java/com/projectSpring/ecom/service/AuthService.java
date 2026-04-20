@@ -60,14 +60,10 @@ public class AuthService {
         return response;
     }
 
-    // Placeholder for refresh token logic
     public Map<String, String> refreshToken(String oldToken) {
-        // Implementation logic for verifying and generating a new token
-        return new HashMap<>(); 
+        return new HashMap<>();
     }
 
-    // Placeholder for logout logic (can be handled by token blacklisting or frontend clearing token)
     public void logout(String token) {
-        // Add to blacklist if maintaining one
     }
 }
