@@ -50,6 +50,7 @@ public class User implements UserDetails {
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
@@ -60,21 +61,25 @@ public class User implements UserDetails {
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isEnabled() {
         return active != null ? active : true;
     }
