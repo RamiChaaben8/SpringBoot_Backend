@@ -1,13 +1,17 @@
 package com.projectSpring.ecom.controller;
 
 import com.projectSpring.ecom.entity.Product;
+import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -16,22 +20,29 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @GetMapping("/my-products")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<List<Product>> getMyProducts(@AuthenticationPrincipal User seller) {
+        return ResponseEntity.ok(productService.getProductsBySeller(seller));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<Product> createProduct(@RequestBody Product product, @AuthenticationPrincipal User seller) {
+        product.setSeller(seller);
         return ResponseEntity.ok(productService.createProduct(product));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        return ResponseEntity.ok(productService.updateProduct(id, product));
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(productService.updateProduct(id, product, user));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.softDelete(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        productService.deleteProduct(id, user);
         return ResponseEntity.noContent().build();
     }
 

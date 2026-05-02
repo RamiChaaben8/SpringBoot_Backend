@@ -27,6 +27,7 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "parent_id")
     @ToString.Exclude
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)

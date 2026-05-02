@@ -1,9 +1,11 @@
 package com.projectSpring.ecom.controller;
 
 import com.projectSpring.ecom.entity.Cart;
+import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,24 +15,24 @@ public class CartController {
 
     private final CartService cartService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Cart> getCart(@PathVariable Long userId) {
-        return ResponseEntity.ok(cartService.getCartForUser(userId));
+    @GetMapping
+    public ResponseEntity<Cart> getCart(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(cartService.getCartForUser(user.getId()));
     }
 
-    @PostMapping("/{userId}/items")
-    public ResponseEntity<Cart> addItem(@PathVariable Long userId, @RequestBody AddItemRequest request) {
-        return ResponseEntity.ok(cartService.addItemToCart(userId, request.productId(), request.quantity()));
+    @PostMapping("/items")
+    public ResponseEntity<Cart> addItem(@AuthenticationPrincipal User user, @RequestBody AddItemRequest request) {
+        return ResponseEntity.ok(cartService.addItemToCart(user.getId(), request.productId(), request.quantity()));
     }
 
-    @DeleteMapping("/{userId}/items/{cartItemId}")
-    public ResponseEntity<Cart> removeItem(@PathVariable Long userId, @PathVariable Long cartItemId) {
-        return ResponseEntity.ok(cartService.removeItemFromCart(userId, cartItemId));
+    @DeleteMapping("/items/{cartItemId}")
+    public ResponseEntity<Cart> removeItem(@AuthenticationPrincipal User user, @PathVariable Long cartItemId) {
+        return ResponseEntity.ok(cartService.removeItemFromCart(user.getId(), cartItemId));
     }
 
-    @PostMapping("/{userId}/coupon")
-    public ResponseEntity<Cart> applyCoupon(@PathVariable Long userId, @RequestParam String couponCode) {
-        return ResponseEntity.ok(cartService.applyCoupon(userId, couponCode));
+    @PostMapping("/coupon")
+    public ResponseEntity<Cart> applyCoupon(@AuthenticationPrincipal User user, @RequestParam String couponCode) {
+        return ResponseEntity.ok(cartService.applyCoupon(user.getId(), couponCode));
     }
 
     public record AddItemRequest(Long productId, int quantity) {}
