@@ -1,5 +1,7 @@
 package com.projectSpring.ecom.service;
 
+import com.projectSpring.ecom.entity.Order;
+import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.repository.OrderRepository;
 import com.projectSpring.ecom.repository.ProductRepository;
 import com.projectSpring.ecom.repository.UserRepository;
@@ -7,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,21 +24,50 @@ public class DashboardService {
     public Map<String, Object> getAdminDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", userRepository.count());
-        stats.put("totalProducts", productRepository.count());
+        stats.put("totalSellers", userRepository.findAll().stream().filter(u -> u.getRole() == User.Role.SELLER).count());
         stats.put("totalOrders", orderRepository.count());
-        // Add more complex aggregations here
+        
+        double totalRevenue = orderRepository.findAll().stream()
+                .filter(o -> o.getStatus() != Order.OrderStatus.CANCELLED)
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+        stats.put("totalRevenue", totalRevenue);
+        
         return stats;
     }
 
     public Map<String, Object> getSellerDashboardStats(Long sellerId) {
         Map<String, Object> stats = new HashMap<>();
-        // Query specific to seller products and orders
+        List<Order> sellerOrders = orderRepository.findOrdersBySellerId(sellerId);
+        
+        stats.put("myProductsCount", productRepository.findAll().stream().filter(p -> p.getSeller().getId().equals(sellerId)).count());
+        stats.put("pendingOrdersCount", sellerOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.PENDING).count());
+        
+        double totalSales = sellerOrders.stream()
+                .filter(o -> o.getStatus() != Order.OrderStatus.CANCELLED)
+                .flatMap(o -> o.getItems().stream())
+                .filter(i -> i.getProduct().getSeller().getId().equals(sellerId))
+                .mapToDouble(i -> i.getUnitPrice() * i.getQuantity())
+                .sum();
+        stats.put("totalSales", totalSales);
+        
         return stats;
     }
 
     public Map<String, Object> getCustomerDashboardStats(Long customerId) {
         Map<String, Object> stats = new HashMap<>();
-        // Query customer specific past orders, cart state, etc.
+        User customer = userRepository.findById(customerId).orElseThrow();
+        List<Order> orders = orderRepository.findByCustomer(customer);
+        
+        stats.put("myOrdersCount", orders.size());
+        stats.put("cartItemsCount", 0); // Placeholder, will be updated by cart service or frontend
+        
+        double totalSpent = orders.stream()
+                .filter(o -> o.getStatus() != Order.OrderStatus.CANCELLED)
+                .mapToDouble(Order::getTotalAmount)
+                .sum();
+        stats.put("totalSpent", totalSpent);
+        
         return stats;
     }
 }

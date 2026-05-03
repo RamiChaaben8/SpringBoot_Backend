@@ -1,13 +1,17 @@
 package com.projectSpring.ecom.controller;
 
+import com.projectSpring.ecom.dto.AuthResponse;
+import com.projectSpring.ecom.dto.LoginRequest;
+import com.projectSpring.ecom.dto.UserRequest;
+import com.projectSpring.ecom.dto.UserResponse;
 import com.projectSpring.ecom.entity.User;
+import com.projectSpring.ecom.mapper.UserMapper;
 import com.projectSpring.ecom.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -15,31 +19,20 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserMapper userMapper;
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody User user) {
-        return ResponseEntity.ok(authService.register(user));
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody UserRequest request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request) {
-        //String email = body.get("email");
-        //String password = body.get("password");
-        String email = request.email();
-        String password = request.password();
-        if (email == null || password == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "email and password required"));
-        }
-        try {
-            return ResponseEntity.ok(authService.login(email, password));
-        } catch (Exception ex) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", ex.getMessage()));
-        }
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request.email(), request.password()));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refreshToken(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<AuthResponse> refreshToken(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(authService.refreshToken(token));
     }
 
@@ -49,10 +42,8 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    public record LoginRequest(String email, String password) {}
-
     @GetMapping("/me")
-    public ResponseEntity<User> me(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> me(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(userMapper.toResponse(user));
     }
 }

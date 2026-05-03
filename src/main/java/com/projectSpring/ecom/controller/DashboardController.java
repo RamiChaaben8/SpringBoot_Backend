@@ -1,9 +1,11 @@
 package com.projectSpring.ecom.controller;
 
+import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -21,15 +23,15 @@ public class DashboardController {
         return ResponseEntity.ok(dashboardService.getAdminDashboardStats());
     }
 
-    @GetMapping("/seller/{sellerId}")
+    @GetMapping("/seller")
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<Map<String, Object>> getSellerStats(@PathVariable Long sellerId) {
-        return ResponseEntity.ok(dashboardService.getSellerDashboardStats(sellerId));
+    public ResponseEntity<Map<String, Object>> getSellerStats(@AuthenticationPrincipal User seller) {
+        return ResponseEntity.ok(dashboardService.getSellerDashboardStats(seller.getId()));
     }
 
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/customer")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<Map<String, Object>> getCustomerStats(@PathVariable Long customerId) {
-        return ResponseEntity.ok(dashboardService.getCustomerDashboardStats(customerId));
+    public ResponseEntity<Map<String, Object>> getCustomerStats(@AuthenticationPrincipal User customer) {
+        return ResponseEntity.ok(dashboardService.getCustomerDashboardStats(customer.getId()));
     }
 }

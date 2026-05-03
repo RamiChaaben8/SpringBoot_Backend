@@ -20,6 +20,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CouponService couponService;
 
     public Cart getCartForUser(Long userId) {
         return cartRepository.findByCustomerId(userId)
@@ -69,8 +70,20 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    @Transactional
     public Cart applyCoupon(Long userId, String couponCode) {
-        // Implementation for coupons can be added here
-        return getCartForUser(userId);
+        Cart cart = getCartForUser(userId);
+        com.projectSpring.ecom.entity.Coupon coupon = couponService.validateCoupon(couponCode);
+        cart.setCoupon(coupon);
+        cart.setLastModified(System.currentTimeMillis());
+        return cartRepository.save(cart);
+    }
+
+    @Transactional
+    public Cart removeCoupon(Long userId) {
+        Cart cart = getCartForUser(userId);
+        cart.setCoupon(null);
+        cart.setLastModified(System.currentTimeMillis());
+        return cartRepository.save(cart);
     }
 }

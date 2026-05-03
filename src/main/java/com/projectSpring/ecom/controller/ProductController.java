@@ -1,9 +1,11 @@
 package com.projectSpring.ecom.controller;
 
-import com.projectSpring.ecom.entity.Product;
+import com.projectSpring.ecom.dto.ProductRequest;
+import com.projectSpring.ecom.dto.ProductResponse;
 import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.service.FileService;
 import com.projectSpring.ecom.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,21 +36,20 @@ public class ProductController {
 
     @GetMapping("/my-products")
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<List<Product>> getMyProducts(@AuthenticationPrincipal User seller) {
+    public ResponseEntity<List<ProductResponse>> getMyProducts(@AuthenticationPrincipal User seller) {
         return ResponseEntity.ok(productService.getProductsBySeller(seller));
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product, @AuthenticationPrincipal User seller) {
-        product.setSeller(seller);
-        return ResponseEntity.ok(productService.createProduct(product));
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request, @AuthenticationPrincipal User seller) {
+        return ResponseEntity.ok(productService.createProduct(request, seller));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(productService.updateProduct(id, product, user));
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest request, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(productService.updateProduct(id, request, user));
     }
 
     @DeleteMapping("/{id}")
@@ -59,14 +60,17 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProduct(id));
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> searchProducts(
+    public ResponseEntity<Page<ProductResponse>> searchProducts(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
             Pageable pageable) {
-        return ResponseEntity.ok(productService.searchProducts(keyword, pageable));
+        return ResponseEntity.ok(productService.searchProducts(keyword, categoryId, minPrice, maxPrice, pageable));
     }
 }

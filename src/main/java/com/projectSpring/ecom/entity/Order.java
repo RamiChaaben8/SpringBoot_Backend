@@ -44,6 +44,14 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;
 
+    @Column(name = "discount_amount")
+    @Builder.Default
+    private Double discountAmount = 0.0;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
     @Builder.Default
     @Column(name = "order_date")
     private Long orderDate = System.currentTimeMillis();
@@ -54,6 +62,6 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED, RETURNED
+        PENDING, CONFIRMED, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED
     }
 }

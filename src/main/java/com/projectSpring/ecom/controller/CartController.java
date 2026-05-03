@@ -35,5 +35,10 @@ public class CartController {
         return ResponseEntity.ok(cartService.applyCoupon(user.getId(), couponCode));
     }
 
+    @DeleteMapping("/coupon")
+    public ResponseEntity<Cart> removeCoupon(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(cartService.removeCoupon(user.getId()));
+    }
+
     public record AddItemRequest(Long productId, int quantity) {}
 }

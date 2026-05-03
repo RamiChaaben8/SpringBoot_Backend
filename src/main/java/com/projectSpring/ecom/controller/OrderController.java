@@ -1,6 +1,6 @@
 package com.projectSpring.ecom.controller;
 
-import com.projectSpring.ecom.entity.Order;
+import com.projectSpring.ecom.dto.OrderResponse;
 import com.projectSpring.ecom.entity.User;
 import com.projectSpring.ecom.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -18,25 +18,33 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @GetMapping("/seller/all")
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<List<OrderResponse>> getMyOrders(@AuthenticationPrincipal User customer) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomer(customer));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<OrderResponse> placeOrder(@AuthenticationPrincipal User customer) {
+        return ResponseEntity.ok(orderService.createOrderFromCart(customer.getId()));
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+    }
+
+    @PutMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.cancelOrder(id));
+    }
+
+    @GetMapping("/seller")
     @PreAuthorize("hasRole('SELLER')")
-    public ResponseEntity<List<Order>> getSellerOrders(@AuthenticationPrincipal User seller) {
+    public ResponseEntity<List<OrderResponse>> getSellerOrders(@AuthenticationPrincipal User seller) {
         return ResponseEntity.ok(orderService.getOrdersBySeller(seller.getId()));
-    }
-
-    @PostMapping("/{userId}")
-    public ResponseEntity<Order> createOrder(@PathVariable Long userId) {
-        return ResponseEntity.ok(orderService.createOrderFromCart(userId));
-    }
-
-    @PatchMapping("/{orderId}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
-    public ResponseEntity<Order> updateStatus(@PathVariable Long orderId, @RequestParam String status) {
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
-    }
-
-    @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<Order> cancelOrder(@PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.cancelOrder(orderId));
     }
 }

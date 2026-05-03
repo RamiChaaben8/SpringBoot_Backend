@@ -18,6 +18,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByStatus(Order.OrderStatus status);
 
+    @Query("SELECT o FROM Order o WHERE o.customer.id = :customerId")
+    List<Order> findByCustomerId(Long customerId);
+
+
     @Query("SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.product.seller.id = :sellerId")
     List<Order> findOrdersBySellerId(@Param("sellerId") Long sellerId);
+
+    @Query("SELECT COUNT(o) > 0 FROM Order o JOIN o.items i WHERE o.customer.id = :customerId AND i.product.id = :productId")
+    boolean hasPurchasedProduct(@Param("customerId") Long customerId, @Param("productId") Long productId);
 }

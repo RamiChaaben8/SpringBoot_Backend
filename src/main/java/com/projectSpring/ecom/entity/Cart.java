@@ -27,6 +27,10 @@ public class Cart {
     @ToString.Exclude
     private List<CartItem> items = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
     @Builder.Default
     @Column(name = "last_modified")
     private Long lastModified = System.currentTimeMillis();
