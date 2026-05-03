@@ -2,6 +2,7 @@ package com.projectSpring.ecom.controller;
 
 import com.projectSpring.ecom.entity.Product;
 import com.projectSpring.ecom.entity.User;
+import com.projectSpring.ecom.service.FileService;
 import com.projectSpring.ecom.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -10,8 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -19,6 +23,14 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final FileService fileService;
+
+    @PostMapping("/upload-image")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+        String url = fileService.uploadFile(file);
+        return ResponseEntity.ok(Map.of("url", url));
+    }
 
     @GetMapping("/my-products")
     @PreAuthorize("hasRole('SELLER')")
