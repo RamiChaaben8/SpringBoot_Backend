@@ -36,6 +36,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
     }
 
+    @GetMapping("{id}/status")
+    public String getStatus(@PathVariable Long id) {
+        return orderService.getOrderStatus(id);
+    }
+
     @PutMapping("/{id}/cancel")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long id) {

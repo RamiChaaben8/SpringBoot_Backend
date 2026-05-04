@@ -122,6 +122,12 @@ public class OrderService {
         return mapToResponse(orderRepository.save(order));
     }
 
+    public String getOrderStatus(Long orderId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(()->new RuntimeException("not found"));
+        return order.getStatus().toString();
+    }
+
     public OrderResponse cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));

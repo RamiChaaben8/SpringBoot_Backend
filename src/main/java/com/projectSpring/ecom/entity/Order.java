@@ -62,6 +62,6 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED
+        PENDING, CONFIRMED, PAID, PROCESSING, SHIPPED, DELIVERED, CANCELLED, RETURNED
     }
 }
