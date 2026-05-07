@@ -57,7 +57,7 @@ public class Product {
     private Set<Category> categories = new HashSet<>();
 
     @ElementCollection
-    @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+    @CollectionTable(name = "product_images_list", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     @Builder.Default
     private List<String> images = new ArrayList<>();
