@@ -8,6 +8,8 @@ import com.projectSpring.ecom.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +25,44 @@ public class DashboardService {
 
     public Map<String, Object> getAdminDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totalUsers", userRepository.count());
-        stats.put("totalSellers", userRepository.findAll().stream().filter(u -> u.getRole() == User.Role.SELLER).count());
+        List<User> allUsers = userRepository.findAll();
+        long sellers = allUsers.stream().filter(u -> u.getRole() == User.Role.SELLER).count();
+        long customers = allUsers.stream().filter(u -> u.getRole() == User.Role.CUSTOMER).count();
+        long admins = allUsers.stream().filter(u -> u.getRole() == User.Role.ADMIN).count();
+        
+        stats.put("totalUsers", allUsers.size());
+        stats.put("totalSellers", sellers);
+        stats.put("totalCustomers", customers);
+        stats.put("totalAdmins", admins);
         stats.put("totalOrders", orderRepository.count());
         
-        double totalRevenue = orderRepository.findAll().stream()
+        List<Order> allOrders = orderRepository.findAll();
+        double totalRevenue = allOrders.stream()
                 .filter(o -> o.getStatus() != Order.OrderStatus.CANCELLED)
                 .mapToDouble(Order::getTotalAmount)
                 .sum();
         stats.put("totalRevenue", totalRevenue);
+
+        // Revenue by date using orderDate (Long timestamp)
+        Map<String, Double> revenueByDate = allOrders.stream()
+                .filter(o -> o.getStatus() != Order.OrderStatus.CANCELLED)
+                .collect(Collectors.groupingBy(
+                        o -> Instant.ofEpochMilli(o.getOrderDate())
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                                .toString(),
+                        Collectors.summingDouble(Order::getTotalAmount)
+                ));
+        stats.put("revenueByDate", revenueByDate);
+
+        // Products sold count (Top 5)
+        Map<String, Long> productSales = allOrders.stream()
+                .flatMap(o -> o.getItems().stream())
+                .collect(Collectors.groupingBy(
+                        i -> i.getProduct().getName(),
+                        Collectors.summingLong(i -> (long) i.getQuantity())
+                ));
+        stats.put("productSales", productSales);
         
         return stats;
     }
