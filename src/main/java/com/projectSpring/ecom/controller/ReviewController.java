@@ -31,9 +31,22 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getProductReviews(productId));
     }
 
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ReviewResponse>> getPendingReviews() {
+        return ResponseEntity.ok(reviewService.getPendingReviews());
+    }
+
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ReviewResponse> approveReview(@PathVariable Long id) {
         return ResponseEntity.ok(reviewService.approveReview(id));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> declineReview(@PathVariable Long id) {
+        reviewService.declineReview(id);
+        return ResponseEntity.noContent().build();
     }
 }

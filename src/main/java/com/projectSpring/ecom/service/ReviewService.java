@@ -47,11 +47,24 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
+    public List<ReviewResponse> getPendingReviews() {
+        return reviewRepository.findByApprovedFalse().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     public ReviewResponse approveReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
         review.setApproved(true);
         return mapToResponse(reviewRepository.save(review));
+    }
+
+    public void declineReview(Long reviewId) {
+        if (!reviewRepository.existsById(reviewId)) {
+            throw new RuntimeException("Review not found");
+        }
+        reviewRepository.deleteById(reviewId);
     }
 
     private ReviewResponse mapToResponse(Review review) {
