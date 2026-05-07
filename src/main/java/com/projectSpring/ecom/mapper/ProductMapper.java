@@ -43,6 +43,7 @@ public class ProductMapper {
                 .promoPrice(request.getPromoPrice())
                 .stock(request.getStock())
                 .images(request.getImages())
+                .active(request.getActive() != null ? request.getActive() : true)
                 .build();
     }
 }

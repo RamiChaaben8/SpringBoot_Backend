@@ -35,6 +35,8 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(req -> req
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/products/**", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/categories/**", "GET")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/uploads/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
                 .requestMatchers(

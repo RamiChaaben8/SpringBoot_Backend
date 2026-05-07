@@ -35,4 +35,6 @@ public class ProductRequest {
     private Set<Long> categoryIds;
 
     private List<String> images;
+
+    private Boolean active;
 }
